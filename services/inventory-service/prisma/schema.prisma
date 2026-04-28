@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id               String    @id @default(uuid())
+  sku              String    @unique
+  name             String
+  description      String?
+  unit             String    @default("pcs")
+  reorderThreshold Int       @default(10)
+  warehouseLocation String?
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  transactions StockTransaction[]
+
+  @@map("products")
+}
+
+model StockTransaction {
+  id        String               @id @default(uuid())
+  productId String
+  type      StockTransactionType
+  quantity  Int
+  orderId   String?
+  notes     String?
+  createdBy String
+  createdAt DateTime             @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("stock_transactions")
+}
+
+enum StockTransactionType {
+  STOCK_IN
+  STOCK_OUT
+  ADJUSTMENT
+}

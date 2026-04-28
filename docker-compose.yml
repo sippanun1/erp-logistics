@@ -1,0 +1,153 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: erp_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: erp_user
+      POSTGRES_PASSWORD: erp_password
+      POSTGRES_DB: erp_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U erp_user -d erp_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    container_name: erp_auth
+    restart: unless-stopped
+    env_file: ./services/auth-service/.env
+    environment:
+      DATABASE_URL: postgresql://erp_user:erp_password@postgres:5432/erp_db?schema=auth
+      PORT: 3001
+    ports:
+      - '3001:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./shared:/app/shared:ro
+
+  order-service:
+    build:
+      context: ./services/order-service
+      dockerfile: Dockerfile
+    container_name: erp_orders
+    restart: unless-stopped
+    env_file: ./services/order-service/.env
+    environment:
+      DATABASE_URL: postgresql://erp_user:erp_password@postgres:5432/erp_db?schema=orders
+      PORT: 3002
+      AUTH_SERVICE_URL: http://auth-service:3001
+    ports:
+      - '3002:3002'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    volumes:
+      - ./shared:/app/shared:ro
+
+  inventory-service:
+    build:
+      context: ./services/inventory-service
+      dockerfile: Dockerfile
+    container_name: erp_inventory
+    restart: unless-stopped
+    env_file: ./services/inventory-service/.env
+    environment:
+      DATABASE_URL: postgresql://erp_user:erp_password@postgres:5432/erp_db?schema=inventory
+      PORT: 3003
+      AUTH_SERVICE_URL: http://auth-service:3001
+      ORDER_SERVICE_URL: http://order-service:3002
+    ports:
+      - '3003:3003'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    volumes:
+      - ./shared:/app/shared:ro
+
+  billing-service:
+    build:
+      context: ./services/billing-service
+      dockerfile: Dockerfile
+    container_name: erp_billing
+    restart: unless-stopped
+    env_file: ./services/billing-service/.env
+    environment:
+      DATABASE_URL: postgresql://erp_user:erp_password@postgres:5432/erp_db?schema=billing
+      PORT: 3004
+      AUTH_SERVICE_URL: http://auth-service:3001
+      ORDER_SERVICE_URL: http://order-service:3002
+    ports:
+      - '3004:3004'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+    volumes:
+      - ./shared:/app/shared:ro
+
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: erp_gateway
+    restart: unless-stopped
+    env_file: ./services/api-gateway/.env
+    environment:
+      PORT: 3000
+      AUTH_SERVICE_URL: http://auth-service:3001
+      ORDER_SERVICE_URL: http://order-service:3002
+      INVENTORY_SERVICE_URL: http://inventory-service:3003
+      BILLING_SERVICE_URL: http://billing-service:3004
+    ports:
+      - '3000:3000'
+    depends_on:
+      - auth-service
+      - order-service
+      - inventory-service
+      - billing-service
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: erp_frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    ports:
+      - '3005:3000'
+    depends_on:
+      - api-gateway
+
+  nginx:
+    image: nginx:alpine
+    container_name: erp_nginx
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api-gateway
+      - frontend
+
+volumes:
+  postgres_data:
