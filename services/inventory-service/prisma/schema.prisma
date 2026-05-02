@@ -8,20 +8,41 @@ datasource db {
 }
 
 model Product {
-  id               String    @id @default(uuid())
-  sku              String    @unique
-  name             String
-  description      String?
-  unit             String    @default("pcs")
-  reorderThreshold Int       @default(10)
+  id                String    @id @default(uuid())
+  sku               String    @unique
+  name              String
+  description       String?
+  unit              String    @default("pcs")
+  reorderThreshold  Int       @default(10)
+  currentStock      Int       @default(0)   // maintained atomically — never read from transactions sum
   warehouseLocation String?
-  deletedAt        DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  deletedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   transactions StockTransaction[]
 
+  @@index([sku])
+  @@index([deletedAt])
   @@map("products")
+}
+
+model StockTransaction {
+  id        String               @id @default(uuid())
+  productId String
+  type      StockTransactionType
+  quantity  Int                  // positive = added, negative = removed
+  stockAfter Int                 // snapshot of currentStock after this tx — useful for auditing
+  orderId   String?
+  notes     String?
+  createdBy String
+  createdAt DateTime             @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@index([orderId])
+  @@map("stock_transactions")
 }
 
 model StockTransaction {

@@ -15,4 +15,5 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY prisma ./prisma
 
 EXPOSE 3001
-CMD ["node", "dist/index.js"]
+# Run migrations then start — safe for production (migrate deploy is idempotent)
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]

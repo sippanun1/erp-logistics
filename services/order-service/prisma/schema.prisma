@@ -21,6 +21,9 @@ model Order {
   items      OrderItem[]
   statusLogs OrderStatusLog[]
 
+  @@index([customerId])
+  @@index([status])
+  @@index([createdAt])
   @@map("orders")
 }
 
@@ -35,6 +38,8 @@ model OrderItem {
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
+  @@index([orderId])
+  @@index([productId])
   @@map("order_items")
 }
 

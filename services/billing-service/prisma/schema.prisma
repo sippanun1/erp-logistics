@@ -26,6 +26,11 @@ model Invoice {
 
   lineItems InvoiceLineItem[]
 
+  @@index([customerId])
+  @@index([orderId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([paidAt])
   @@map("invoices")
 }
 

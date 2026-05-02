@@ -1,6 +1,6 @@
 import type { Response } from 'express';
 import { z } from 'zod';
-import { createProduct, getProducts, recordTransaction, getLowStockProducts } from '../services/inventory.service';
+import { createProduct, getProducts, recordTransaction, getLowStockProducts, getTransactionHistory } from '../services/inventory.service';
 import type { AuthRequest } from '../middleware/auth.middleware';
 
 const createProductSchema = z.object({
@@ -78,4 +78,16 @@ export async function stockTransaction(req: AuthRequest, res: Response): Promise
 export async function lowStockAlerts(_req: AuthRequest, res: Response): Promise<void> {
   const products = await getLowStockProducts();
   res.json({ success: true, data: products });
+}
+
+export async function transactionHistory(req: AuthRequest, res: Response): Promise<void> {
+  const { productId } = req.params;
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 50));
+  const { transactions, total } = await getTransactionHistory(productId, page, limit);
+  res.json({
+    success: true,
+    data: transactions,
+    meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  });
 }

@@ -34,9 +34,15 @@ services:
       - '3001:3001'
     depends_on:
       postgres:
-        condition: service_healthy
+        condition: service_healthy   # wait for DB to be ready before migrating
     volumes:
       - ./shared:/app/shared:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3001/health || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   order-service:
     build:
@@ -55,9 +61,15 @@ services:
       postgres:
         condition: service_healthy
       auth-service:
-        condition: service_started
+        condition: service_healthy   # wait for auth migrations to finish first
     volumes:
       - ./shared:/app/shared:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3002/health || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   inventory-service:
     build:
@@ -77,9 +89,15 @@ services:
       postgres:
         condition: service_healthy
       auth-service:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ./shared:/app/shared:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3003/health || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   billing-service:
     build:
@@ -99,9 +117,15 @@ services:
       postgres:
         condition: service_healthy
       auth-service:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ./shared:/app/shared:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3004/health || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   api-gateway:
     build:
@@ -119,10 +143,14 @@ services:
     ports:
       - '3000:3000'
     depends_on:
-      - auth-service
-      - order-service
-      - inventory-service
-      - billing-service
+      auth-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+      inventory-service:
+        condition: service_healthy
+      billing-service:
+        condition: service_healthy
 
   frontend:
     build:
@@ -131,7 +159,7 @@ services:
     container_name: erp_frontend
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3000
+      NEXT_PUBLIC_API_URL: http://localhost:3000/api
     ports:
       - '3005:3000'
     depends_on:

@@ -1,16 +1,23 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
-import { saveTokens, ROLE_HOME } from '@/lib/auth';
+import { saveTokens, ROLE_HOME, getStoredUser } from '@/lib/auth';
 import type { AuthUser } from '../../../shared/types/index';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Redirect already-authenticated users away from login page
+  useEffect(() => {
+    const user = getStoredUser();
+    if (user) router.replace(ROLE_HOME[user.role]);
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -20,7 +27,8 @@ export default function LoginPage() {
       saveTokens(data.data.accessToken, data.data.refreshToken);
       const user: AuthUser = data.data.user;
       toast.success(`Welcome back, ${user.name}!`);
-      router.push(ROLE_HOME[user.role]);
+      const from = searchParams.get('from');
+      router.push(from ?? ROLE_HOME[user.role]);
     } catch {
       toast.error('Invalid email or password');
     } finally {
