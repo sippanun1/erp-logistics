@@ -22,4 +22,4 @@ COPY --from=builder /app/services/auth-service/node_modules/.prisma ./node_modul
 COPY services/auth-service/prisma ./prisma
 
 EXPOSE 3001
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/services/auth-service/src/index.js"]

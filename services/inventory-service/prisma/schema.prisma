@@ -45,21 +45,6 @@ model StockTransaction {
   @@map("stock_transactions")
 }
 
-model StockTransaction {
-  id        String               @id @default(uuid())
-  productId String
-  type      StockTransactionType
-  quantity  Int
-  orderId   String?
-  notes     String?
-  createdBy String
-  createdAt DateTime             @default(now())
-
-  product Product @relation(fields: [productId], references: [id])
-
-  @@map("stock_transactions")
-}
-
 enum StockTransactionType {
   STOCK_IN
   STOCK_OUT

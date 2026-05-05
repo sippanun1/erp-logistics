@@ -20,4 +20,4 @@ COPY --from=builder /app/services/order-service/node_modules/.prisma ./node_modu
 COPY services/order-service/prisma ./prisma
 
 EXPOSE 3002
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/services/order-service/src/index.js"]
