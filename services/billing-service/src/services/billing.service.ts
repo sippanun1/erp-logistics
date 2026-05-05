@@ -1,5 +1,5 @@
 import prisma from './prisma';
-import type { InvoiceStatus } from '../../../shared/types/index';
+import type { InvoiceStatus } from '../../../../shared/types/index';
 
 async function generateInvoiceNumber(): Promise<string> {
   const now = new Date();

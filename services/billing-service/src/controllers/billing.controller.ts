@@ -8,7 +8,7 @@ import {
   getRevenueReport,
 } from '../services/billing.service';
 import type { AuthRequest } from '../middleware/auth.middleware';
-import type { InvoiceStatus } from '../../../shared/types/index';
+import type { InvoiceStatus } from '../../../../shared/types/index';
 
 const lineItemSchema = z.object({
   description: z.string().min(1),

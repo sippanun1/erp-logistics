@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import prisma from './prisma';
-import type { JwtPayload, Role } from '../../../shared/types/index';
+import type { JwtPayload, Role } from '../../../../shared/types/index';
 
 const ACCESS_SECRET = process.env.JWT_SECRET!;
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;

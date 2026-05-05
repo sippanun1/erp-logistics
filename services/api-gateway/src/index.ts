@@ -6,7 +6,7 @@ import rateLimit from 'express-rate-limit';
 import { WebSocketServer } from 'ws';
 import jwt from 'jsonwebtoken';
 import { proxyRoutes } from './routes/proxy.routes';
-import type { JwtPayload } from '../../shared/types/index';
+import type { JwtPayload } from '../../../shared/types/index';
 
 const app = express();
 const server = http.createServer(app);

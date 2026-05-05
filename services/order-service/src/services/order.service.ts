@@ -1,5 +1,5 @@
 import prisma from './prisma';
-import type { OrderStatus } from '../../../shared/types/index';
+import type { OrderStatus } from '../../../../shared/types/index';
 
 const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   PENDING: ['PROCESSING', 'CANCELLED'],

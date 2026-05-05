@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import prisma from './prisma';
 import { signAccessToken, issueRefreshToken } from './token.service';
-import type { Role } from '../../../shared/types/index';
+import type { Role } from '../../../../shared/types/index';
 
 const BCRYPT_ROUNDS = 12;
 

@@ -2,7 +2,7 @@ import type { Response } from 'express';
 import { z } from 'zod';
 import { createOrder, getOrders, getOrderById, updateOrderStatus } from '../services/order.service';
 import type { AuthRequest } from '../middleware/auth.middleware';
-import type { OrderStatus } from '../../../shared/types/index';
+import type { OrderStatus } from '../../../../shared/types/index';
 
 const orderItemSchema = z.object({
   productId: z.string().uuid(),

@@ -20,8 +20,8 @@ services:
 
   auth-service:
     build:
-      context: ./services/auth-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/auth-service/Dockerfile
     container_name: erp_auth
     restart: unless-stopped
     env_file: ./services/auth-service/.env
@@ -44,8 +44,8 @@ services:
 
   order-service:
     build:
-      context: ./services/order-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/order-service/Dockerfile
     container_name: erp_orders
     restart: unless-stopped
     env_file: ./services/order-service/.env
@@ -71,8 +71,8 @@ services:
 
   inventory-service:
     build:
-      context: ./services/inventory-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/inventory-service/Dockerfile
     container_name: erp_inventory
     restart: unless-stopped
     env_file: ./services/inventory-service/.env
@@ -99,8 +99,8 @@ services:
 
   billing-service:
     build:
-      context: ./services/billing-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/billing-service/Dockerfile
     container_name: erp_billing
     restart: unless-stopped
     env_file: ./services/billing-service/.env
@@ -127,8 +127,8 @@ services:
 
   api-gateway:
     build:
-      context: ./services/api-gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
     container_name: erp_gateway
     restart: unless-stopped
     env_file: ./services/api-gateway/.env
@@ -152,8 +152,8 @@ services:
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
     container_name: erp_frontend
     restart: unless-stopped
     environment:

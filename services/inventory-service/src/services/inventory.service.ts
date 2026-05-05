@@ -1,5 +1,5 @@
 import prisma from './prisma';
-import type { StockTransactionType } from '../../../shared/types/index';
+import type { StockTransactionType } from '../../../../shared/types/index';
 
 export async function createProduct(data: {
   sku: string;
