@@ -1,5 +1,35 @@
 # ERP Logistics System
 
+## What Is This Project?
+
+This is a **full-stack Enterprise Resource Planning (ERP) system** built for a **Warehouse / Third-Party Logistics (3PL) business**.
+
+A 3PL company stores and ships goods on behalf of other businesses (their clients/customers). To run smoothly, they need software that connects three core operations: **receiving and tracking inventory**, **processing customer orders**, and **billing clients** — all in one place. That is what this system does.
+
+### The Problem It Solves
+Without an ERP, warehouse businesses rely on spreadsheets and disconnected tools. This causes:
+- Stock going out of sync (selling goods that aren't actually in stock)
+- No clear order status visibility for clients
+- Manual invoice creation that's slow and error-prone
+- No audit trail when stock discrepancies occur
+
+### What This System Provides
+- **Inventory control** — Real-time stock levels per product/SKU, atomic stock-in/stock-out transactions, automatic low-stock alerts, full transaction audit trail
+- **Order management** — Full order lifecycle (PENDING → PROCESSING → SHIPPED → DELIVERED), role-based access so warehouse staff and customers see the right data
+- **Billing** — Auto-generate invoices from completed orders, track payment status, financial reports
+- **User access control** — Four roles (Admin, Warehouse Staff, Billing, Customer), each with their own dashboard and permissions
+- **Real-time alerts** — WebSocket notifications when stock falls below reorder thresholds or order statuses change
+
+### Who Uses It
+| Role | What they do |
+|---|---|
+| **Admin** | Manage users, system configuration, full access |
+| **Warehouse Staff** | Process orders, record stock movements |
+| **Billing/Finance** | Generate and track invoices, view revenue reports |
+| **Customer/Client** | Place orders, track their own shipments |
+
+---
+
 ## Project Overview
 A full-stack ERP for a Warehouse / 3PL logistics business. Built with microservices architecture for scalability and maintainability. Portfolio-grade but production-ready in design.
 
@@ -123,3 +153,27 @@ Auth-service specific:
 - No `any` types — use `unknown` and narrow
 - Shared types imported from `../../shared/types`
 - Zod used for runtime validation at all API boundaries
+
+---
+
+## Build Status (as of 2026-05-05)
+
+### Done ✅
+- Full project scaffold — all 5 services + frontend + shared types
+- Docker Compose with health checks and proper startup ordering
+- Nginx reverse proxy config
+- Auth service — JWT (access + refresh), bcrypt, RBAC middleware
+- API Gateway — JWT validation, proxy routing, rate limiting
+- Order service — order lifecycle, status machine, per-role access
+- Inventory service — atomic stock transactions (`prisma.$transaction`), reorder alerts, audit trail
+- Billing service — invoice generation, payment status tracking
+- Frontend scaffold — Next.js 14 App Router, Tailwind CSS, auth middleware
+- Shared TypeScript types across all services
+- All Docker build errors resolved (rootDir constraint, shared types path, duplicate model)
+
+### Next Steps 🔜
+- `docker-compose up --build` — verify all containers start healthy end-to-end
+- WebSocket server for real-time stock alerts and live dashboard metrics
+- Frontend pages — login, order board, inventory table, billing dashboard
+- Seed script for demo data
+- End-to-end verification: register → login → create order → move stock → generate invoice
