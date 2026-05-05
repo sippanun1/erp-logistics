@@ -158,22 +158,56 @@ Auth-service specific:
 
 ## Build Status (as of 2026-05-05)
 
-### Done ✅
-- Full project scaffold — all 5 services + frontend + shared types
-- Docker Compose with health checks and proper startup ordering
-- Nginx reverse proxy config
-- Auth service — JWT (access + refresh), bcrypt, RBAC middleware
-- API Gateway — JWT validation, proxy routing, rate limiting
-- Order service — order lifecycle, status machine, per-role access
-- Inventory service — atomic stock transactions (`prisma.$transaction`), reorder alerts, audit trail
-- Billing service — invoice generation, payment status tracking
-- Frontend scaffold — Next.js 14 App Router, Tailwind CSS, auth middleware
-- Shared TypeScript types across all services
-- All Docker build errors resolved (rootDir constraint, shared types path, duplicate model)
+### Infrastructure ✅
+- `docker-compose.yml` — all 8 containers (postgres, 4 services, api-gateway, frontend, nginx) with health checks and proper startup ordering
+- `nginx/nginx.conf` — routes `/api/` → api-gateway, `/` → frontend, WebSocket upgrade headers
+- `scripts/init-db.sql` — creates all 4 PostgreSQL schemas (auth, orders, inventory, billing)
+- `shared/types/index.ts` — 171 lines of shared TypeScript types across all services
 
-### Next Steps 🔜
-- `docker-compose up --build` — verify all containers start healthy end-to-end
-- WebSocket server for real-time stock alerts and live dashboard metrics
-- Frontend pages — login, order board, inventory table, billing dashboard
-- Seed script for demo data
-- End-to-end verification: register → login → create order → move stock → generate invoice
+### Auth Service (port 3001) ✅
+- JWT issuance — access tokens (15 min) + refresh tokens (7 days)
+- bcrypt password hashing (cost factor 12)
+- RBAC middleware — validates role on every protected route
+- Prisma schema — `User`, `RefreshToken` models
+- Routes: register, login, refresh token, get/update users
+
+### API Gateway (port 3000) ✅
+- JWT validation on all incoming requests
+- Reverse proxy routing to all 4 backend services
+- Rate limiting (100 req/15min public, 1000 req/15min authenticated)
+- **WebSocket server** — listens on `/ws`, authenticates via JWT query param, broadcasts events to connected clients
+
+### Order Service (port 3002) ✅
+- Full order lifecycle — `PENDING → PROCESSING → SHIPPED → DELIVERED | CANCELLED`
+- Role-based access (customers see only their own orders)
+- Prisma schema — `Order`, `OrderItem` models
+- Routes: create, list, get by ID, update status, cancel
+
+### Inventory Service (port 3003) ✅
+- Atomic stock transactions via `prisma.$transaction()` — stock never goes negative
+- `currentStock` maintained as a denormalised column (no O(n) aggregation)
+- `stockAfter` snapshot on every transaction for full audit trail
+- Reorder threshold alerts published to WebSocket on stock-out
+- Prisma schema — `Product`, `StockTransaction` models
+- Routes: create/update/delete products, stock-in, stock-out, adjustment, transaction history
+
+### Billing Service (port 3004) ✅
+- Invoice generation from completed orders
+- Payment status tracking — `DRAFT → SENT → PAID | OVERDUE | VOID`
+- Prisma schema — `Invoice`, `InvoiceLineItem` models
+- Routes: create invoice, list, get by ID, update status
+
+### Frontend (port 3005) ✅
+- Next.js 14 App Router with route groups `(auth)` and `(dashboard)`
+- `middleware.ts` — JWT expiry check, redirects unauthenticated users to `/login`
+- Pages: login, orders, inventory, billing, users
+- `lib/api.ts` — typed API client with auth headers
+- `lib/ws.ts` + `hooks/useWs.ts` — WebSocket client and React hook for real-time events
+- Sidebar navigation with role-aware links
+
+### Pending ⏳
+- `docker-compose up --build` — needs a full end-to-end run to confirm all containers start healthy
+- Frontend pages are scaffolded but need real API data wired in (fetch calls, loading states, forms)
+- No seed script yet — demo data must be entered manually via API after first boot
+- WebSocket broadcasts stock/order events but frontend toasts are not yet implemented
+- End-to-end test: register → login → create order → move stock below threshold → confirm alert fires → generate invoice
