@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { AlertTriangle } from 'lucide-react';
 import api from '@/lib/api';
 import { useWsEvent } from '@/hooks/useWs';
-import type { Product, WsEvent } from '../../../../shared/types/index';
+import type { Product, WsEvent } from '@shared/types';
 
 export default function InventoryPage() {
   const [products, setProducts] = useState<(Product & { currentStock: number })[]>([]);

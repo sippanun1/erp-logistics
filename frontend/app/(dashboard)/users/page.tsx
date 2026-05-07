@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
-import type { AuthUser } from '../../../../shared/types/index';
+import type { AuthUser } from '@shared/types';
 
 export default function UsersPage() {
   const [users, setUsers] = useState<AuthUser[]>([]);

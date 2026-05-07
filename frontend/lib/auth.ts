@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-import type { AuthUser, Role } from '../../shared/types/index';
+import type { AuthUser, Role } from '@shared/types';
 
 export function saveTokens(accessToken: string, refreshToken: string): void {
   Cookies.set('access_token', accessToken, { secure: true, sameSite: 'strict' });

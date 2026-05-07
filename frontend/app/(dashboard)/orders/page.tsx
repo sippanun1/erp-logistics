@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useWsEvent } from '@/hooks/useWs';
-import type { Order, WsEvent, OrderStatus } from '../../../../shared/types/index';
+import type { Order, WsEvent, OrderStatus } from '@shared/types';
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
   PENDING: 'bg-yellow-100 text-yellow-800',

@@ -5,7 +5,7 @@ import { Package, ShoppingCart, Receipt, Users, LogOut, LayoutDashboard } from '
 import { clsx } from 'clsx';
 import { useAuth } from '@/hooks/useAuth';
 import { clearTokens } from '@/lib/auth';
-import type { Role } from '../../../shared/types/index';
+import type { Role } from '@shared/types';
 
 const NAV_ITEMS: { href: string; label: string; icon: React.ReactNode; roles: Role[] }[] = [
   { href: '/orders', label: 'Orders', icon: <ShoppingCart size={18} />, roles: ['ADMIN', 'WAREHOUSE_STAFF', 'CUSTOMER'] },

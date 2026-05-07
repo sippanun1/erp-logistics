@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
-import type { Invoice, InvoiceStatus } from '../../../../shared/types/index';
+import type { Invoice, InvoiceStatus } from '@shared/types';
 
 const STATUS_COLORS: Record<InvoiceStatus, string> = {
   DRAFT: 'bg-gray-100 text-gray-700',

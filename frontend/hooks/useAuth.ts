@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { getStoredUser } from '@/lib/auth';
-import type { AuthUser } from '../../shared/types/index';
+import type { AuthUser } from '@shared/types';
 
 export function useAuth() {
   const [user, setUser] = useState<AuthUser | null>(null);
