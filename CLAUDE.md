@@ -154,6 +154,31 @@ Auth-service specific:
 - Shared types imported from `../../shared/types`
 - Zod used for runtime validation at all API boundaries
 
+## Git & GitHub Workflow
+After completing any meaningful piece of work — a feature, a bug fix, a refactor, a schema change, or a config update — commit and push to GitHub immediately. Never let finished work sit uncommitted.
+
+**Commit rules:**
+- Write a clear subject line in the imperative mood: `feat: add stock-out endpoint`, not `did some stuff`
+- Use a prefix to categorise the change:
+  - `feat:` — new feature or endpoint
+  - `fix:` — bug fix
+  - `refactor:` — code restructure with no behaviour change
+  - `docs:` — CLAUDE.md, README, comments only
+  - `chore:` — config, Dockerfile, docker-compose, deps
+  - `schema:` — Prisma schema or migration changes
+- If the change needs explanation, add a short body after a blank line describing *why*, not just *what*
+- Keep commits focused — one logical change per commit, not a dump of everything at once
+
+**When to commit:**
+- After adding or modifying a route, controller, or service function
+- After a feature is working end-to-end (even if not yet polished)
+- After fixing a bug
+- After any schema or migration change
+- After updating Dockerfiles, docker-compose, or nginx config
+- Before switching to a different service or layer
+
+**Push after every commit** — a local-only commit is not a backup.
+
 ---
 
 ## Build Status (as of 2026-05-05)
