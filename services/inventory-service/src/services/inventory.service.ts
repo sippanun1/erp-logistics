@@ -97,13 +97,25 @@ export async function recordTransaction(data: {
 }
 
 export async function getLowStockProducts() {
-  // Single query — currentStock is a real column with an index
-  return prisma.product.findMany({
-    where: {
-      deletedAt: null,
-      // Prisma doesn't support column-to-column comparison directly, use raw for this
-    },
-  }).then((products) => products.filter((p) => p.currentStock <= p.reorderThreshold));
+  // Prisma doesn't support column-to-column comparisons in `where`, so we use
+  // a raw query. This keeps filtering in the DB — no full table scan in Node.
+  return prisma.$queryRaw<
+    Array<{
+      id: string;
+      sku: string;
+      name: string;
+      currentStock: number;
+      reorderThreshold: number;
+      unit: string;
+      warehouseLocation: string | null;
+    }>
+  >`
+    SELECT id, sku, name, "currentStock", "reorderThreshold", unit, "warehouseLocation"
+    FROM inventory.products
+    WHERE "deletedAt" IS NULL
+      AND "currentStock" <= "reorderThreshold"
+    ORDER BY "currentStock" ASC
+  `;
 }
 
 export async function getTransactionHistory(productId: string, page: number, limit: number) {

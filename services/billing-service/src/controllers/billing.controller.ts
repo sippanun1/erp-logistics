@@ -87,8 +87,9 @@ export async function updateStatus(req: AuthRequest, res: Response): Promise<voi
         res.status(404).json({ success: false, error: 'Invoice not found' });
         return;
       }
-      if (err.message === 'INVOICE_VOID') {
-        res.status(422).json({ success: false, error: 'Cannot modify a voided invoice' });
+      if (err.message.startsWith('INVALID_TRANSITION')) {
+        const [, from, to] = err.message.split(':');
+        res.status(422).json({ success: false, error: `Cannot transition invoice from ${from} to ${to}` });
         return;
       }
     }

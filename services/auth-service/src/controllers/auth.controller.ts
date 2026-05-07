@@ -1,7 +1,9 @@
 import type { Request, Response } from 'express';
 import { z } from 'zod';
+import jwt from 'jsonwebtoken';
 import { registerUser, loginUser } from '../services/auth.service';
 import { rotateRefreshToken, revokeRefreshToken, verifyAccessToken } from '../services/token.service';
+import type { JwtPayload } from '../../../../shared/types/index';
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -71,8 +73,14 @@ export async function refresh(req: Request, res: Response): Promise<void> {
   }
 
   try {
-    // Decode without verifying expiry to get userId
-    const decoded = verifyAccessToken(authHeader.slice(7));
+    // jwt.decode does NOT verify the signature or expiry — intentional here.
+    // The refresh token is the proof of identity; we only need the payload
+    // from the old access token to know which user/role to mint the new one for.
+    const decoded = jwt.decode(authHeader.slice(7)) as JwtPayload | null;
+    if (!decoded?.sub || !decoded.email || !decoded.role) {
+      res.status(401).json({ success: false, error: 'Malformed access token' });
+      return;
+    }
     const tokens = await rotateRefreshToken(
       parsed.data.refreshToken,
       decoded.sub,

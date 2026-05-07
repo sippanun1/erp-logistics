@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-import type { WsEvent } from '../../shared/types/index';
+import type { WsEvent } from '@shared/types';
 
 type Handler = (event: WsEvent) => void;
 
@@ -26,6 +26,9 @@ export function connectWs(): void {
   };
 
   socket.onclose = () => {
+    // Null out the old reference before reconnecting so connectWs()
+    // doesn't see a stale CLOSING/CLOSED socket and skip the new connect
+    socket = null;
     setTimeout(connectWs, 3000);
   };
 }

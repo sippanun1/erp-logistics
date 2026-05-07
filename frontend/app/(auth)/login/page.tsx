@@ -1,12 +1,12 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { saveTokens, ROLE_HOME, getStoredUser } from '@/lib/auth';
-import type { AuthUser } from '../../../shared/types/index';
+import type { AuthUser } from '@shared/types';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
@@ -27,8 +27,10 @@ export default function LoginPage() {
       saveTokens(data.data.accessToken, data.data.refreshToken);
       const user: AuthUser = data.data.user;
       toast.success(`Welcome back, ${user.name}!`);
+      // Only allow relative redirects — reject anything that could be an external URL
       const from = searchParams.get('from');
-      router.push(from ?? ROLE_HOME[user.role]);
+      const safeTo = from?.startsWith('/') ? from : ROLE_HOME[user.role];
+      router.push(safeTo);
     } catch {
       toast.error('Invalid email or password');
     } finally {
@@ -75,5 +77,13 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
