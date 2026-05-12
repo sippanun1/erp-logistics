@@ -6,14 +6,16 @@ import { rotateRefreshToken, revokeRefreshToken, verifyAccessToken } from '../se
 import type { JwtPayload } from '../../../../shared/types/index';
 
 const registerSchema = z.object({
-  email: z.string().email(),
+  // Normalise to lowercase so User@Co.com and user@co.com are the same account
+  email: z.string().email().transform((e) => e.toLowerCase()),
   name: z.string().min(2).max(100),
   password: z.string().min(8),
-  role: z.enum(['ADMIN', 'WAREHOUSE_STAFF', 'BILLING', 'CUSTOMER']).optional(),
+  // Role is NOT accepted from the request body — all public registrations are CUSTOMER.
+  // Only an ADMIN can elevate a user via PUT /users/:id/role.
 });
 
 const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email().transform((e) => e.toLowerCase()),
   password: z.string().min(1),
 });
 

@@ -54,6 +54,7 @@ model OrderStatusLog {
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
+  @@index([orderId])   // getOrderById fetches all logs for an order
   @@map("order_status_logs")
 }
 

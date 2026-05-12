@@ -32,6 +32,8 @@ model RefreshToken {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])       // fast lookup for logout-all-sessions
+  @@index([expiresAt])    // fast cleanup of expired tokens
   @@map("refresh_tokens")
 }
 
