@@ -96,6 +96,10 @@ export async function updateStatus(req: AuthRequest, res: Response): Promise<voi
         res.status(422).json({ success: false, error: `Cannot transition order from ${from} to ${to}` });
         return;
       }
+      if (err.message === 'CONCURRENT_MODIFICATION') {
+        res.status(409).json({ success: false, error: 'Order was modified by another request — please retry' });
+        return;
+      }
     }
     throw err;
   }

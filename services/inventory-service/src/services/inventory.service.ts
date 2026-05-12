@@ -59,10 +59,21 @@ export async function recordTransaction(data: {
   const signedQty = data.type === 'STOCK_OUT' ? -Math.abs(data.quantity) : Math.abs(data.quantity);
 
   return prisma.$transaction(async (tx) => {
-    // Lock the product row for this transaction (SELECT ... FOR UPDATE via findUniqueOrThrow)
-    const product = await tx.product.findUnique({
-      where: { id: data.productId },
-    });
+    // SELECT ... FOR UPDATE acquires a row-level lock so concurrent transactions
+    // must wait — prevents two simultaneous STOCK_OUT requests from both reading
+    // the same currentStock value and both passing the >= 0 check.
+    const rows = await tx.$queryRaw<Array<{
+      id: string; sku: string; name: string; unit: string;
+      currentStock: number; reorderThreshold: number;
+      warehouseLocation: string | null; deletedAt: Date | null;
+    }>>`
+      SELECT id, sku, name, unit, "currentStock", "reorderThreshold",
+             "warehouseLocation", "deletedAt"
+      FROM inventory.products
+      WHERE id = ${data.productId}
+      FOR UPDATE
+    `;
+    const product = rows[0];
 
     if (!product || product.deletedAt) throw new Error('PRODUCT_NOT_FOUND');
 

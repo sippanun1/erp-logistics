@@ -138,6 +138,8 @@ services:
       ORDER_SERVICE_URL: http://order-service:3002
       INVENTORY_SERVICE_URL: http://inventory-service:3003
       BILLING_SERVICE_URL: http://billing-service:3004
+      # Browser requests come from http://localhost (Nginx on port 80), not localhost:3005
+      CORS_ORIGIN: http://localhost
     ports:
       - '3000:3000'
     depends_on:
@@ -156,8 +158,8 @@ services:
       dockerfile: frontend/Dockerfile
     container_name: erp_frontend
     restart: unless-stopped
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3000/api
+    # NEXT_PUBLIC_API_URL is intentionally omitted — the default is '/api'
+    # which routes through Nginx correctly in both dev and Docker.
     ports:
       - '3005:3000'
     depends_on:

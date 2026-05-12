@@ -79,10 +79,22 @@ export async function updateOrderStatus(
     throw new Error(`INVALID_TRANSITION:${order.status}:${newStatus}`);
   }
 
+  // updateMany with the expected current status as a WHERE condition.
+  // If another request already changed the status, count === 0 and we abort
+  // instead of silently overwriting the concurrent update.
+  const guard = await prisma.order.updateMany({
+    where: { id, status: order.status },
+    data: { status: newStatus },
+  });
+
+  if (guard.count === 0) {
+    throw new Error('CONCURRENT_MODIFICATION');
+  }
+
+  // Append the status log and return the updated order
   return prisma.order.update({
     where: { id },
     data: {
-      status: newStatus,
       statusLogs: {
         create: { fromStatus: order.status, toStatus: newStatus, changedBy, note },
       },

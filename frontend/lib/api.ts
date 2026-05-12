@@ -12,17 +12,32 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Guard flag — prevents an infinite refresh loop when the refresh token
+// itself is expired (401 → refresh → 401 → refresh → ...).
+let isRefreshing = false;
+
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config;
+
     if (error.response?.status === 401 && !original._retry) {
+      // If we're already mid-refresh, don't try again — just send to login
+      if (isRefreshing) {
+        Cookies.remove('access_token');
+        Cookies.remove('refresh_token');
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+
       original._retry = true;
       const refreshToken = Cookies.get('refresh_token');
+
       if (refreshToken) {
+        isRefreshing = true;
         try {
           const { data } = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api'}/auth/refresh`,
+            '/api/auth/refresh',
             { refreshToken },
             { headers: { Authorization: `Bearer ${Cookies.get('access_token')}` } },
           );
@@ -33,9 +48,12 @@ api.interceptors.response.use(
           Cookies.remove('access_token');
           Cookies.remove('refresh_token');
           window.location.href = '/login';
+        } finally {
+          isRefreshing = false;
         }
       }
     }
+
     return Promise.reject(error);
   },
 );
