@@ -17,6 +17,8 @@ WORKDIR /app/frontend
 RUN npm install
 
 COPY frontend/ .
+# Ensure public/ always exists — Next.js requires it even when empty
+RUN mkdir -p public
 RUN npm run build
 
 FROM node:20-alpine AS runner
