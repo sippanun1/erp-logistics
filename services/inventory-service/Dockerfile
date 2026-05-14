@@ -22,4 +22,4 @@ COPY --from=builder /app/services/inventory-service/node_modules/.prisma ./node_
 COPY services/inventory-service/prisma ./prisma
 
 EXPOSE 3003
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/services/inventory-service/src/index.js"]
+CMD ["sh", "-c", "echo 'CREATE SCHEMA IF NOT EXISTS inventory;' | npx prisma db execute --stdin && npx prisma migrate deploy && node dist/services/inventory-service/src/index.js"]

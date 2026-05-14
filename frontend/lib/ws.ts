@@ -12,9 +12,11 @@ export function connectWs(): void {
   const token = Cookies.get('access_token');
   if (!token) return;
 
-  const wsBase = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000')
-    .replace(/^http/, 'ws');
-  socket = new WebSocket(`${wsBase}/ws?token=${token}`);
+  // NEXT_PUBLIC_WS_URL is set at build time (e.g. wss://erp-gateway.onrender.com).
+  // Falls back to the current browser host so it works in Docker Compose via Nginx.
+  const wsUrl = process.env.NEXT_PUBLIC_WS_URL ??
+    `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
+  socket = new WebSocket(`${wsUrl}/ws?token=${token}`);
 
   socket.onmessage = (ev) => {
     try {

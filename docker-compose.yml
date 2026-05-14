@@ -156,10 +156,14 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
+      args:
+        # In Docker Compose, Next.js rewrites proxy /api/* to the gateway container
+        API_GATEWAY_URL: http://api-gateway:3000
+        NEXT_PUBLIC_WS_URL: ws://localhost/ws  # browser hits Nginx on port 80
     container_name: erp_frontend
     restart: unless-stopped
-    # NEXT_PUBLIC_API_URL is intentionally omitted — the default is '/api'
-    # which routes through Nginx correctly in both dev and Docker.
+    environment:
+      API_GATEWAY_URL: http://api-gateway:3000
     ports:
       - '3005:3000'
     depends_on:

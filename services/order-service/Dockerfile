@@ -22,4 +22,4 @@ COPY --from=builder /app/services/order-service/node_modules/.prisma ./node_modu
 COPY services/order-service/prisma ./prisma
 
 EXPOSE 3002
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/services/order-service/src/index.js"]
+CMD ["sh", "-c", "echo 'CREATE SCHEMA IF NOT EXISTS orders;' | npx prisma db execute --stdin && npx prisma migrate deploy && node dist/services/order-service/src/index.js"]

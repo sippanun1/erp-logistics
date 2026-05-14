@@ -22,4 +22,4 @@ COPY --from=builder /app/services/billing-service/node_modules/.prisma ./node_mo
 COPY services/billing-service/prisma ./prisma
 
 EXPOSE 3004
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/services/billing-service/src/index.js"]
+CMD ["sh", "-c", "echo 'CREATE SCHEMA IF NOT EXISTS billing;' | npx prisma db execute --stdin && npx prisma migrate deploy && node dist/services/billing-service/src/index.js"]

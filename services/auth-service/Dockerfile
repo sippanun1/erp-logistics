@@ -24,4 +24,4 @@ COPY --from=builder /app/services/auth-service/node_modules/.prisma ./node_modul
 COPY services/auth-service/prisma ./prisma
 
 EXPOSE 3001
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/services/auth-service/src/index.js"]
+CMD ["sh", "-c", "echo 'CREATE SCHEMA IF NOT EXISTS auth;' | npx prisma db execute --stdin && npx prisma migrate deploy && node dist/services/auth-service/src/index.js"]
